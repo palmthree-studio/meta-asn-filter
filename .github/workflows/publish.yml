@@ -32,6 +32,10 @@ jobs:
       - name: Install
         run: npm ci
 
+      # 3.5 – installer whois (nécessaire pour build-cidr.js)
+      - name: Install whois
+        run: sudo apt-get update && sudo apt-get install -y whois
+
       # 4 – reconstruit la liste CIDR
       - name: Refresh CIDR list
         run: npm run refresh

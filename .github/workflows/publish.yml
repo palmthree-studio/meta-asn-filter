@@ -49,6 +49,7 @@ jobs:
 
       # 6 – commit + tag si diff
       - name: Commit & tag
+        if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name  "Meta ASN Bot"
           git config user.email "bot@users.noreply.github.com"
@@ -59,6 +60,22 @@ jobs:
           npm version patch --no-git-tag-version
           git add package.json package-lock.json
           git commit --amend --no-edit
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          git tag "v$NEW_VERSION"
+
+          git push origin HEAD:main --follow-tags
+
+      # 6.5 – version patch même sans changement CIDR
+      - name: Version bump (no CIDR changes)
+        if: steps.diff.outputs.changed != 'true'
+        run: |
+          git config user.name  "Meta ASN Bot"
+          git config user.email "bot@users.noreply.github.com"
+
+          npm version patch --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "chore: bump version"
 
           NEW_VERSION=$(node -p "require('./package.json').version")
           git tag "v$NEW_VERSION"

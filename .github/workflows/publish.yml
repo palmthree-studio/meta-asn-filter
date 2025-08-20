@@ -44,11 +44,11 @@ jobs:
       - name: Detect changes
         id: diff
         run: |
-          git diff --quiet -- data/meta-asn.json || echo "changed=true" >> "$GITHUB_OUTPUT"
+          git diff --quiet -- data/meta-asn.json && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "CIDR changed: ${{ steps.diff.outputs.changed }}"
 
       # 6 – commit + tag si diff
       - name: Commit & tag
-        if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name  "Meta ASN Bot"
           git config user.email "bot@users.noreply.github.com"
@@ -67,5 +67,4 @@ jobs:
 
       # 7 – publication npm
       - name: Publish to npm
-        if: steps.diff.outputs.changed == 'true'
         run: npm publish --access public

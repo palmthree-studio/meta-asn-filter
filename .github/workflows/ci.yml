@@ -1,0 +1,35 @@
+name: CI
+
+# ──────────────── Déclencheurs ────────────────
+on:
+  push: # chaque push sur n'importe quelle branche
+  pull_request: # et chaque PR ouverte ou mise à jour
+
+# ──────────────── Job unique ────────────────
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest # machine GitHub standard
+
+    steps:
+      # 1) Récupère le code du dépôt
+      - name: Checkout
+        uses: actions/checkout@v4 # branche ref déjà gérée
+
+      # 2) Installe Node + met en cache le ~/.npm
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # ≥ 18 recommandé
+          cache: npm # cache node_modules
+
+      # 3) Installe les dépendances à partir du lockfile
+      - name: Install deps
+        run: npm ci
+
+      # 4) Compile la lib (src → dist)
+      - name: Build
+        run: npm run build
+
+      # 5) Lance la suite de tests
+      - name: Test
+        run: npm test

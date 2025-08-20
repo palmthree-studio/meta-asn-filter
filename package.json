@@ -1,6 +1,6 @@
 {
   "name": "@palmthree-studio/meta-asn-filter",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "type": "module",
   "description": "Meta ASN Filter - A tool for filtering and processing ASN data",
   "main": "./dist/index.cjs",

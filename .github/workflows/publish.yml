@@ -1,0 +1,67 @@
+name: Publish
+
+on:
+  # exécution automatique : 1ᵉʳ de chaque mois, 03 h UTC
+  schedule:
+    - cron: "0 3 1 * *"
+  # exécution manuelle via le bouton « Run workflow »
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      # 1 – clone avec un token qui peut pousser
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      # 2 – installe Node + cache npm
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+
+      # 3 – dépendances
+      - name: Install
+        run: npm ci
+
+      # 4 – reconstruit la liste CIDR
+      - name: Refresh CIDR list
+        run: npm run refresh
+
+      # 5 – détection de changements
+      - name: Detect changes
+        id: diff
+        run: |
+          git diff --quiet -- data/meta-asn.json || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # 6 – commit + tag si diff
+      - name: Commit & tag
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name  "Meta ASN Bot"
+          git config user.email "bot@users.noreply.github.com"
+
+          git add data/meta-asn.json
+          git commit -m "chore: refresh CIDR list"
+
+          npm version patch --no-git-tag-version
+          git add package.json package-lock.json
+          git commit --amend --no-edit
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          git tag "v$NEW_VERSION"
+
+          git push origin HEAD:main --follow-tags
+
+      # 7 – publication npm
+      - name: Publish to npm
+        if: steps.diff.outputs.changed == 'true'
+        run: npm publish --access public

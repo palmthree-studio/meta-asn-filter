@@ -1,11 +1,15 @@
 {
   "name": "@palmthree-studio/meta-asn-filter",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "Meta ASN Filter - A tool for filtering and processing ASN data",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "data/"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -15,6 +19,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
+    "prepublishOnly": "npm run build",
     "refresh": "node scripts/build-cidr.js",
     "test": "jest"
   },

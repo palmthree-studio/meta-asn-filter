@@ -20,11 +20,6 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Check token
-        run: echo $NODE_AUTH_TOKEN | tail -c 9
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       # 2 – installe Node + cache npm
       - name: Setup Node
         uses: actions/setup-node@v4
